@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # types, lint, tests, coverage, dependencies, file size; fails unless the grade is A
+      # and the committed badge matches
+      - run: npm run quality -- --check
+      - run: npm run build

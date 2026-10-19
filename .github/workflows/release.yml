@@ -1,0 +1,79 @@
+name: Release
+
+# Every push to main is checked. If it contains releasable Conventional Commits
+# (feat, fix, perf, refactor, or a breaking change) since the last tag, a new
+# version is tagged, built and published as a GitHub release with a zip.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Force a release with this bump (leave empty to decide from commits)
+        type: choice
+        default: ''
+        options: ['', patch, minor, major]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history and tags are needed to compute the version
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - name: Quality gate (types, lint, tests, coverage; must be grade A)
+        run: npm run quality -- --check
+
+      - name: Compute version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          if [ -n "$BUMP" ]; then
+            node scripts/next-version.mjs --bump "$BUMP"
+          else
+            node scripts/next-version.mjs
+          fi
+
+      - name: Build
+        if: steps.version.outputs.release == 'true'
+        env:
+          MCLI_VERSION: ${{ steps.version.outputs.version }}
+        run: npm run build
+
+      - name: Package
+        if: steps.version.outputs.release == 'true'
+        run: |
+          name="mcli-${{ steps.version.outputs.tag }}"
+          mkdir -p "release/$name"
+          cp dist/mcli.js start.bat start.sh "release/$name/"
+          chmod +x "release/$name/start.sh"
+          (cd release && zip -r "$name.zip" "$name")
+          cp dist/mcli.js release/mcli.js
+
+      - name: Publish release
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          gh release create "$tag" \
+            "release/mcli-$tag.zip" \
+            "release/mcli.js" \
+            --target "$GITHUB_SHA" \
+            --title "MCLI $tag" \
+            --generate-notes

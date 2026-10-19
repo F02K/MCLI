@@ -1,0 +1,8 @@
+{
+  "all": true,
+  "include": [".test-build/src/**/*.js"],
+  "exclude": [".test-build/src/tui/term.js", ".test-build/src/tui/types.js"],
+  "reporter": ["text-summary", "json-summary"],
+  "reports-dir": "coverage",
+  "skip-full": false
+}
