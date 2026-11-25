@@ -31,6 +31,7 @@ const FAMILIES: Record<ProviderId, RegExp[]> = {
   paper: [/^paper-.*\.jar$/i, /^fabric-server.*\.jar$/i, /^minecraft_server.*\.jar$/i, /^server\.jar$/i, /^forge-.*\.jar$/i],
   fabric: [/^paper-.*\.jar$/i, /^fabric-server.*\.jar$/i, /^minecraft_server.*\.jar$/i, /^server\.jar$/i, /^forge-.*\.jar$/i],
   forge: [/^paper-.*\.jar$/i, /^fabric-server.*\.jar$/i], // forge needs the vanilla jar next to it
+  velocity: [/^velocity-.*\.jar$/i],
 };
 
 function runProcess(command: string, args: string[], cwd: string, onLine: (line: string) => void): Promise<void> {

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { readInstallMeta } from './installmeta';
 import { readZipFileSync } from './zip';
 
-export type ServerType = 'vanilla' | 'paper' | 'fabric' | 'forge' | 'neoforge';
+export type ServerType = 'vanilla' | 'paper' | 'fabric' | 'forge' | 'neoforge' | 'velocity';
 
 export interface DetectedServer {
   type: ServerType;
@@ -77,7 +77,7 @@ export function detectServer(dir: string): DetectedServer | null {
       const forge = detectArgsLauncher(dir);
       if (forge?.type === 'forge') return forge;
     } else if (existsSync(join(dir, meta.file))) {
-      return { type: meta.provider, dir, mcVersion: meta.mcVersion, launchArgs: launch(meta.file), jar: meta.file };
+      return { type: meta.provider, dir, mcVersion: meta.mcVersion, launchArgs: meta.provider === 'velocity' ? ['-jar', meta.file] : launch(meta.file), jar: meta.file };
     }
   }
 
@@ -102,6 +102,13 @@ export function detectServer(dir: string): DetectedServer | null {
   if (fabric) {
     const v = /fabric-server-mc\.([\d.]+)/i.exec(fabric.jar)?.[1];
     return { type: 'fabric', dir, mcVersion: v, launchArgs: launch(fabric.jar), jar: fabric.jar };
+  }
+
+  const proxy = info.find((j) => j.main.startsWith('com.velocitypowered.')) ?? info.find((j) => /^velocity[-.]/i.test(j.jar));
+  if (proxy) {
+    // proxies have no "nogui" argument and no Minecraft version
+    const v = /^velocity-([\d.]+(?:-SNAPSHOT)?)-\d+\.jar$/i.exec(proxy.jar)?.[1];
+    return { type: 'velocity', dir, mcVersion: v, launchArgs: ['-jar', proxy.jar], jar: proxy.jar };
   }
 
   const paper = info.find((j) => j.main.startsWith('io.papermc.paperclip.')) ?? info.find((j) => /^paper[-.]/i.test(j.jar));

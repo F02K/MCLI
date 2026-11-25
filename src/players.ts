@@ -5,6 +5,9 @@ import type { ServerProcess, ServerState } from './server';
 
 const JOIN_RE = /: (\S+) joined the game\s*$/;
 const LEAVE_RE = /: (\S+) left the game\s*$/;
+// Velocity: "[connected player] Name (/1.2.3.4:5678) has connected" / "... has disconnected"
+const PROXY_JOIN_RE = /\[connected player\] (\S+) \(\S+\) has connected\s*$/;
+const PROXY_LEAVE_RE = /\[connected player\] (\S+) \(\S+\) has disconnected\s*$/;
 const LIST_RE = /There are (\d+) of a max of (\d+) players online:\s*(.*)$/;
 const LIST_OLD_RE = /There are (\d+)\/(\d+) players online:\s*(.*)$/;
 
@@ -26,13 +29,13 @@ export class PlayerTracker extends EventEmitter {
   }
 
   private onLine(line: string): void {
-    let m = JOIN_RE.exec(line);
+    let m = JOIN_RE.exec(line) ?? PROXY_JOIN_RE.exec(line);
     if (m) {
       this.online.set(m[1], Date.now());
       this.emit('change');
       return;
     }
-    m = LEAVE_RE.exec(line);
+    m = LEAVE_RE.exec(line) ?? PROXY_LEAVE_RE.exec(line);
     if (m) {
       this.online.delete(m[1]);
       this.emit('change');

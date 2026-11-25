@@ -1,6 +1,6 @@
 import { fetchJson, fetchText } from './net';
 
-export type ProviderId = 'vanilla' | 'paper' | 'fabric' | 'forge';
+export type ProviderId = 'vanilla' | 'paper' | 'fabric' | 'forge' | 'velocity';
 
 export interface DownloadPlan {
   provider: ProviderId;
@@ -32,6 +32,7 @@ export interface Provider {
 export const DEFAULT_ENDPOINTS = {
   mojang: 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json',
   paper: 'https://fill.papermc.io/v3/projects/paper',
+  velocity: 'https://fill.papermc.io/v3/projects/velocity',
   fabric: 'https://meta.fabricmc.net/v2/versions',
   forgePromos: 'https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json',
   forgeMaven: 'https://maven.minecraftforge.net/net/minecraftforge/forge',
@@ -256,8 +257,59 @@ function forge(ep: Endpoints): Provider {
   };
 }
 
-export function createProviders(ep: Endpoints = DEFAULT_ENDPOINTS): Record<ProviderId, Provider> {
-  return { vanilla: vanilla(ep), paper: paper(ep), fabric: fabric(ep), forge: forge(ep) };
+// ---------------------------------------------------------------- Velocity (proxy)
+
+/** Velocity needs Java 17 or newer. */
+const VELOCITY_JAVA = 17;
+
+/** "3.4.0-SNAPSHOT" -> [3, 4, 0] */
+function velocityParts(v: string): number[] {
+  return v.replace(/-.*$/, '').split('.').map((n) => parseInt(n, 10) || 0);
 }
 
-export const PROVIDER_ORDER: ProviderId[] = ['paper', 'vanilla', 'fabric', 'forge'];
+function velocity(ep: Endpoints): Provider {
+  return {
+    id: 'velocity',
+    label: 'Velocity (proxy)',
+    /** For a proxy the "version" is the Velocity version, not a Minecraft version. */
+    async versions(snapshots) {
+      const p = await fetchJson<PaperProject>(ep.velocity);
+      return Object.values(p.versions)
+        .flat()
+        .filter((v) => snapshots || !v.includes('-'))
+        .sort((a, b) => {
+          const pa = velocityParts(a);
+          const pb = velocityParts(b);
+          for (let i = 0; i < 3; i++) if (pa[i] !== pb[i]) return pb[i] - pa[i];
+          return Number(a.includes('-')) - Number(b.includes('-')); // release before its snapshot
+        });
+    },
+    async plan(version) {
+      const builds = await fetchJson<PaperBuild[]>(`${ep.velocity}/versions/${encodeURIComponent(version)}/builds`);
+      if (!builds.length) throw new Error(`Velocity has no builds for ${version}`);
+      const sorted = [...builds].sort((a, b) => b.id - a.id);
+      const build = sorted.find((b) => b.channel === 'STABLE') ?? sorted[0];
+      const dl = build.downloads['server:default'];
+      if (!dl) throw new Error(`Velocity build ${build.id} has no server download`);
+      return {
+        provider: 'velocity',
+        mcVersion: version,
+        identity: String(build.id),
+        filename: dl.name,
+        url: dl.url,
+        kind: 'jar',
+        size: dl.size,
+        sha256: dl.checksums.sha256,
+        javaMajor: VELOCITY_JAVA,
+        channel: build.channel,
+        display: `Velocity ${version} build ${build.id}${build.channel !== 'STABLE' ? ` (${build.channel})` : ''}`,
+      };
+    },
+  };
+}
+
+export function createProviders(ep: Endpoints = DEFAULT_ENDPOINTS): Record<ProviderId, Provider> {
+  return { vanilla: vanilla(ep), paper: paper(ep), fabric: fabric(ep), forge: forge(ep), velocity: velocity(ep) };
+}
+
+export const PROVIDER_ORDER: ProviderId[] = ['paper', 'vanilla', 'fabric', 'forge', 'velocity'];

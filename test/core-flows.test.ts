@@ -24,7 +24,7 @@ describe('versions and installing', () => {
     core.exec(':versions paper');
     await waitFor(() => /Paper: 2 versions/.test(infos(core)));
     assert.match(infos(core), /1\.21\.8, 1\.20\.4/);
-    const broken = makeCore(tmp('flows'), {}, { endpoints: { ...core.cfg, mojang: 'http://127.0.0.1:1/x', paper: 'http://127.0.0.1:1/x', fabric: 'http://127.0.0.1:1/x', forgePromos: 'http://127.0.0.1:1/x', forgeMaven: 'http://127.0.0.1:1/x' } });
+    const broken = makeCore(tmp('flows'), {}, { endpoints: { ...core.cfg, mojang: 'http://127.0.0.1:1/x', paper: 'http://127.0.0.1:1/x', velocity: 'http://127.0.0.1:1/x', fabric: 'http://127.0.0.1:1/x', forgePromos: 'http://127.0.0.1:1/x', forgeMaven: 'http://127.0.0.1:1/x' } });
     broken.exec(':versions vanilla');
     await waitFor(() => /Could not load versions/.test(infos(broken)));
   });

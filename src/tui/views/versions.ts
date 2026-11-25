@@ -14,6 +14,7 @@ const PROVIDER_HINT: Record<ProviderId, string> = {
   vanilla: 'official Mojang server',
   fabric: 'lightweight mods',
   forge: 'classic mods (1.12.2+)',
+  velocity: 'proxy that joins several servers',
 };
 
 const row = (label: string, value: string) => ` ${paint(label.padEnd(10), theme.muted)}${value}`;

@@ -1,4 +1,5 @@
 import type { Core } from './core';
+import { listenAddress } from './listen';
 import { pingServer } from './ping';
 
 export interface Health {
@@ -27,10 +28,9 @@ export const freshHealth = (): Health => ({ reachable: null, everReachable: fals
 export async function healthTick(core: Core): Promise<void> {
   const state = core.server.state;
   if (state !== 'starting' && state !== 'running') return;
-  const props = core.properties;
-  const port = Number(props.get('server-port') || 25565);
-  let host = props.get('server-ip') || '127.0.0.1';
-  if (host === '0.0.0.0') host = '127.0.0.1';
+  const addr = listenAddress(core.cfg.serverDir, core.server.detected?.type);
+  const port = addr.port;
+  const host = addr.host === '0.0.0.0' ? '127.0.0.1' : addr.host;
   try {
     const r = await pingServer(host, port);
     core.health = { reachable: true, everReachable: true, failures: 0, latencyMs: r.latencyMs, version: r.version, motd: r.motd, online: r.online, max: r.max, host, port };

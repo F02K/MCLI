@@ -5,7 +5,7 @@
 A full-screen text UI for running and managing a Minecraft server from the console.
 One JavaScript file, no dependencies, no installer: drop it next to your server and start it.
 
-- **Servers:** Vanilla, Paper, Fabric, Forge (detected automatically, also in an existing folder)
+- **Servers:** Vanilla, Paper, Fabric, Forge and the Velocity proxy (detected automatically, also in an existing folder)
 - **Platforms:** Windows and Linux (macOS should work, but is untested)
 - **Needs:** [Node.js](https://nodejs.org) 22 or newer. Java is found or installed by MCLI itself.
 
@@ -39,6 +39,7 @@ Only `mcli.js` is required. `start.bat` / `start.sh` just run `node mcli.js` in 
 | Paper | PaperMC download API |
 | Fabric | Fabric meta API |
 | Forge (1.12.2+) | Forge promotions and maven (runs the official installer) |
+| Velocity (proxy) | PaperMC download API |
 
 Downloads are checksum-verified where the provider publishes one, the jar structure is checked afterwards, and the previous jar is moved to `old-jars/`. MCLI warns about downgrades and can back up the world first. It also tells you when a newer build or Minecraft version is available.
 
@@ -62,6 +63,10 @@ Downloads are checksum-verified where the provider publishes one, the jar struct
 | Console: `Ctrl+F` / `Ctrl+L` | filter / jump to latest |
 
 The Help tab (`7`) lists everything in the app.
+
+## Headless API
+
+`mcli --api` runs without a text UI and speaks JSON lines on stdin/stdout, so other programs can control a server (status, start/stop, players, metrics, memory, installs). See [docs/API.md](docs/API.md).
 
 ## Console commands
 
@@ -118,6 +123,7 @@ MCLI also writes `mcli-install.json` into the server folder to remember what it 
 - **Stopping MCLI stops the server.** The server runs as a child process; quitting MCLI shuts it down gracefully first.
 - **Windows CPU/RAM of the server** is sampled every 10 seconds (via `tasklist`); on Linux and macOS every 2 seconds (via `ps`).
 - **Backups use plain zip** without ZIP64, so a single backup is limited to 4 GB and 65,535 files.
+- **Velocity** is detected by its jar; its port comes from `bind` in `velocity.toml` (default 25577). Other proxies (BungeeCord, Waterfall) are not supported.
 - **Spigot** is not supported (it has no download, only a build tool). Use Paper, which is a drop-in replacement for Spigot plugins.
 
 ## Building from source

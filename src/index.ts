@@ -1,4 +1,5 @@
 import { loadConfig } from './config';
+import { runApi } from './api/stdio';
 import { Core } from './core';
 import { runPlain } from './plain';
 import { Tui } from './tui/tui';
@@ -21,7 +22,9 @@ process.on('unhandledRejection', fail);
 
 try {
   const core = new Core(loadConfig(process.cwd()));
-  if (process.stdin.isTTY && process.stdout.isTTY) {
+  if (process.argv.includes('--api')) {
+    runApi(core);
+  } else if (process.stdin.isTTY && process.stdout.isTTY) {
     tui = new Tui(core, createRealTerm());
     core.banner();
     tui.start();

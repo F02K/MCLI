@@ -11,7 +11,7 @@ export type ServerState = 'stopped' | 'starting' | 'running' | 'stopping';
 const DEFAULT_STOP_TIMEOUT_MS = 30_000;
 const DEFAULT_RESTART_DELAY_MS = 5_000;
 const STABLE_AFTER_MS = 10 * 60_000;
-const READY_PATTERN = /Done \([\d.,]+s\)! For help/;
+const READY_PATTERN = /Done \([\d.,]+s\)!/; // Paper: "... For help", Velocity: just "Done (0.5s)!"
 
 /** The java executable to use: config, then JAVA_HOME, then PATH. */
 export function resolveJava(cfg: Config): string {

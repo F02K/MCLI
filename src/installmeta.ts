@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 /** Remembers what MCLI installed last, so detection and update checks stay exact. */
 export interface InstallMeta {
-  provider: 'vanilla' | 'paper' | 'fabric' | 'forge';
+  provider: 'vanilla' | 'paper' | 'fabric' | 'forge' | 'velocity';
   mcVersion: string;
   identity: string;
   /** The launch jar for vanilla/paper/fabric; the installer name for forge. */

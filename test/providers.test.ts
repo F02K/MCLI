@@ -5,7 +5,7 @@ import { json, mockHttp } from './helpers';
 
 const SHA1 = 'a'.repeat(40);
 let ep: Endpoints;
-let prov: Record<'vanilla' | 'paper' | 'fabric' | 'forge', Provider>;
+let prov: Record<'vanilla' | 'paper' | 'fabric' | 'forge' | 'velocity', Provider>;
 let closeMock: () => Promise<void> = () => Promise.resolve();
 after(() => closeMock());
 
@@ -42,6 +42,19 @@ before(async () => {
         return json(res, []);
       case '/paper/versions/1.1/builds':
         return json(res, [{ id: 1, channel: 'STABLE', downloads: {} }]);
+      case '/velocity':
+        return json(res, { versions: { '4.0.0': ['4.3.1', '4.3.2-SNAPSHOT', '4.3.0'], '3.0.0': ['3.5.1', '3.4.0-SNAPSHOT', '3.4.0'] } });
+      case '/velocity/versions/3.5.1/builds':
+        return json(res, [
+          { id: 40, channel: 'STABLE', downloads: { 'server:default': { name: 'velocity-3.5.1-40.jar', url: 'https://example.invalid/v40', size: 10, checksums: { sha256: 'f'.repeat(64) } } } },
+          { id: 41, channel: 'BETA', downloads: { 'server:default': { name: 'velocity-3.5.1-41.jar', url: 'https://example.invalid/v41', size: 10, checksums: { sha256: 'a'.repeat(64) } } } },
+        ]);
+      case '/velocity/versions/3.4.0/builds':
+        return json(res, [{ id: 7, channel: 'ALPHA', downloads: { 'server:default': { name: 'velocity-3.4.0-7.jar', url: 'https://example.invalid/v7', size: 10, checksums: { sha256: 'b'.repeat(64) } } } }]);
+      case '/velocity/versions/1.0/builds':
+        return json(res, []);
+      case '/velocity/versions/1.1/builds':
+        return json(res, [{ id: 1, channel: 'STABLE', downloads: {} }]);
       case '/fabric/game':
         return json(res, [{ version: '25w01a', stable: false }, { version: '1.21.8', stable: true }]);
       case '/fabric/loader':
@@ -61,7 +74,7 @@ before(async () => {
   }, false);
   closeMock = () => mock.close();
   base = mock.base;
-  ep = { mojang: `${base}/mojang/manifest.json`, paper: `${base}/paper`, fabric: `${base}/fabric`, forgePromos: `${base}/forge/promos.json`, forgeMaven: `${base}/forge/maven` };
+  ep = { mojang: `${base}/mojang/manifest.json`, paper: `${base}/paper`, velocity: `${base}/velocity`, fabric: `${base}/fabric`, forgePromos: `${base}/forge/promos.json`, forgeMaven: `${base}/forge/maven` };
   prov = createProviders(ep);
 });
 
@@ -157,5 +170,32 @@ describe('forge provider', () => {
   });
   it('fails when Forge has no build for the version', async () => {
     await assert.rejects(prov.forge.plan('1.2.3'), /no build/);
+  });
+});
+
+describe('velocity provider', () => {
+  it('lists Velocity versions newest first and hides snapshots by default', async () => {
+    assert.deepEqual(await prov.velocity.versions(false), ['4.3.1', '4.3.0', '3.5.1', '3.4.0']);
+    assert.deepEqual(await prov.velocity.versions(true), ['4.3.2-SNAPSHOT', '4.3.1', '4.3.0', '3.5.1', '3.4.0', '3.4.0-SNAPSHOT']);
+  });
+
+  it('plans the newest STABLE build with checksum and Java 17', async () => {
+    const plan = await prov.velocity.plan('3.5.1');
+    assert.equal(plan.identity, '40');
+    assert.equal(plan.filename, 'velocity-3.5.1-40.jar');
+    assert.equal(plan.sha256, 'f'.repeat(64));
+    assert.equal(plan.javaMajor, 17);
+    assert.equal(plan.provider, 'velocity');
+    assert.equal(plan.display, 'Velocity 3.5.1 build 40');
+  });
+
+  it('falls back to a non-stable build and says so', async () => {
+    const plan = await prov.velocity.plan('3.4.0');
+    assert.equal(plan.display, 'Velocity 3.4.0 build 7 (ALPHA)');
+  });
+
+  it('rejects versions without builds or downloads', async () => {
+    await assert.rejects(() => prov.velocity.plan('1.0'), /no builds/);
+    await assert.rejects(() => prov.velocity.plan('1.1'), /no server download/);
   });
 });

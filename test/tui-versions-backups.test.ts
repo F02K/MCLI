@@ -257,7 +257,7 @@ describe('Versions view', () => {
 
   it('survives an unreachable provider', async () => {
     const dir = tmp('tui');
-    const rig = await tuiRig(dir, {}, { endpoints: { mojang: 'http://127.0.0.1:1/x', paper: 'http://127.0.0.1:1/x', fabric: 'http://127.0.0.1:1/x', forgePromos: 'http://127.0.0.1:1/x', forgeMaven: 'http://127.0.0.1:1/x' }, javaVerify: fakeJavaVerify });
+    const rig = await tuiRig(dir, {}, { endpoints: { mojang: 'http://127.0.0.1:1/x', paper: 'http://127.0.0.1:1/x', velocity: 'http://127.0.0.1:1/x', fabric: 'http://127.0.0.1:1/x', forgePromos: 'http://127.0.0.1:1/x', forgeMaven: 'http://127.0.0.1:1/x' }, javaVerify: fakeJavaVerify });
     await rig.press(K.f(5), 'i', K.enter);
     await screenHas(rig, /Could not load versions/);
   });

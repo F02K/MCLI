@@ -5,6 +5,7 @@ import type { Core } from './core';
 import { jarJavaMajor, quickCheckJar } from './diagnose';
 import { readInstallMeta } from './installmeta';
 import { javaRange } from './java';
+import { listenAddress } from './listen';
 import { javaForMc } from './providers';
 
 function portFree(port: number, host: string): Promise<boolean> {
@@ -66,13 +67,12 @@ export async function preflight(core: Core): Promise<boolean> {
     return false;
   }
 
-  const props = core.properties;
-  const port = Number(props.get('server-port') || 25565);
-  if (Number.isInteger(port) && !(await portFree(port, props.get('server-ip') || '0.0.0.0'))) {
+  const { host, port } = listenAddress(serverDir, det.type);
+  if (Number.isInteger(port) && !(await portFree(port, host))) {
     core.addProblem({
       id: 'port',
       title: `Port ${port} is already in use`,
-      advice: 'Another program (or server) uses this port. Stop it or change server-port in Settings.',
+      advice: `Another program (or server) uses this port. Stop it or change ${det.type === 'velocity' ? '"bind" in velocity.toml' : 'server-port in Settings'}.`,
       fatal: true,
       action: 'settings',
     });

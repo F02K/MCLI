@@ -277,7 +277,7 @@ export async function providerWorld(): Promise<ProviderWorld> {
   return {
     base,
     sha256,
-    endpoints: { mojang: `${base}/mojang/manifest.json`, paper: `${base}/paper`, fabric: `${base}/fabric`, forgePromos: `${base}/forge/promos.json`, forgeMaven: `${base}/forge/maven` },
+    endpoints: { mojang: `${base}/mojang/manifest.json`, paper: `${base}/paper`, velocity: `${base}/velocity`, fabric: `${base}/fabric`, forgePromos: `${base}/forge/promos.json`, forgeMaven: `${base}/forge/maven` },
     javaApi: `${base}/adoptium`,
     setPaperBuild: (b) => {
       paperBuild = b;

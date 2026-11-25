@@ -61,6 +61,7 @@ export function installed(core: Core): InstalledInfo {
   if (!identity && det?.jar) {
     identity =
       /^paper-[\d.]+-(\d+)\.jar$/i.exec(det.jar)?.[1] ??
+      /^velocity-[\d.]+(?:-SNAPSHOT)?-(\d+)\.jar$/i.exec(det.jar)?.[1] ??
       (() => {
         const m = /^fabric-server-mc\.[\d.]+-loader\.([\d.]+)-launcher\.([\d.]+)\.jar$/i.exec(det.jar);
         return m ? `${m[1]}/${m[2]}` : undefined;
