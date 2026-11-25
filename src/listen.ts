@@ -9,9 +9,9 @@ export interface ListenAddress {
   port: number;
 }
 
-export const VELOCITY_DEFAULT_PORT = 25577;
+export const VELOCITY_DEFAULT_PORT = 25565;
 
-/** Reads `bind = "0.0.0.0:25577"` from velocity.toml (default when the file or key is missing). */
+/** Reads `bind = "0.0.0.0:25565"` from velocity.toml (default when the file or key is missing). */
 export function velocityBind(serverDir: string): ListenAddress {
   const file = join(serverDir, 'velocity.toml');
   const fallback = { host: '0.0.0.0', port: VELOCITY_DEFAULT_PORT };
