@@ -66,7 +66,7 @@ describe('Installer', () => {
 
   it('installs, retires old jars of every family and records the metadata', async () => {
     const { dir, installer, calls, plan, jar } = await rig();
-    for (const old of ['paper-1.21.1-50.jar', 'minecraft_server.1.21.1.jar', 'fabric-server-launch.jar', 'forge-1.12.2-14.23.5.2860.jar', 'server.jar']) {
+    for (const old of ['paper-1.21.1-50.jar', 'minecraft_server.1.21.1.jar', 'fabric-server-launch.jar', 'forge-1.12.2-14.23.5.2860.jar', 'server.jar', 'spigot-1.21.1.jar']) {
       writeFileSync(join(dir, old), readFileSync(jar));
     }
     let changes = 0;
@@ -77,7 +77,7 @@ describe('Installer', () => {
     assert.ok(changes > 0);
     assert.equal(installer.busy, null);
     assert.ok(existsSync(join(dir, 'paper-1.21.8-99.jar')));
-    assert.equal(readdirSync(join(dir, 'old-jars')).length, 5);
+    assert.equal(readdirSync(join(dir, 'old-jars')).length, 6);
     assert.deepEqual(readdirSync(dir).filter((f) => f.endsWith('.jar')), ['paper-1.21.8-99.jar']);
     const meta = JSON.parse(readFileSync(join(dir, 'mcli-install.json'), 'utf8')) as { identity: string; javaMajor: number; sha256: string };
     assert.equal(meta.identity, '99');

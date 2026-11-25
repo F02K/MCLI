@@ -27,10 +27,10 @@ const OLD_DIR = 'old-jars';
 
 /** Jar name patterns that belong to a server "family"; leftovers of other families are retired. */
 const FAMILIES: Record<ProviderId, RegExp[]> = {
-  vanilla: [/^paper-.*\.jar$/i, /^fabric-server.*\.jar$/i, /^minecraft_server.*\.jar$/i, /^server\.jar$/i, /^forge-.*\.jar$/i],
-  paper: [/^paper-.*\.jar$/i, /^fabric-server.*\.jar$/i, /^minecraft_server.*\.jar$/i, /^server\.jar$/i, /^forge-.*\.jar$/i],
-  fabric: [/^paper-.*\.jar$/i, /^fabric-server.*\.jar$/i, /^minecraft_server.*\.jar$/i, /^server\.jar$/i, /^forge-.*\.jar$/i],
-  forge: [/^paper-.*\.jar$/i, /^fabric-server.*\.jar$/i], // forge needs the vanilla jar next to it
+  vanilla: [/^paper-.*\.jar$/i, /^fabric-server.*\.jar$/i, /^minecraft_server.*\.jar$/i, /^server\.jar$/i, /^forge-.*\.jar$/i, /^(spigot|craftbukkit)-.*\.jar$/i],
+  paper: [/^paper-.*\.jar$/i, /^fabric-server.*\.jar$/i, /^minecraft_server.*\.jar$/i, /^server\.jar$/i, /^forge-.*\.jar$/i, /^(spigot|craftbukkit)-.*\.jar$/i],
+  fabric: [/^paper-.*\.jar$/i, /^fabric-server.*\.jar$/i, /^minecraft_server.*\.jar$/i, /^server\.jar$/i, /^forge-.*\.jar$/i, /^(spigot|craftbukkit)-.*\.jar$/i],
+  forge: [/^paper-.*\.jar$/i, /^fabric-server.*\.jar$/i, /^(spigot|craftbukkit)-.*\.jar$/i], // forge needs the vanilla jar next to it
   velocity: [/^velocity-.*\.jar$/i],
 };
 
