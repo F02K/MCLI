@@ -1,5 +1,6 @@
 import { saveConfigValue, type EditableConfigKey } from '../config';
 import type { Core } from '../core';
+import { inspectFolder } from '../inspect';
 import { readList, type ListKind } from '../players';
 import type { ProviderId } from '../providers';
 import { buildStatus, installerSnapshot, metricPoint, playersSnapshot, problemsSnapshot } from './protocol';
@@ -103,6 +104,8 @@ export const METHODS: Record<string, Method> = {
     const prov = core.providers[provider(core, str(p, 'provider'))];
     return prov.versions(p.snapshots === true);
   },
+  /** What a folder holds (server software, version, world, plugins, warnings) without touching it: for importing existing servers. */
+  inspect: (_core, p) => inspectFolder(str(p, 'dir')),
   /** What an install would download (name, build, channel, needed Java) without installing anything. */
   plan: async (core, p) => {
     const plan = await core.providers[provider(core, str(p, 'provider'))].plan(str(p, 'version'));

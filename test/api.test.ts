@@ -145,6 +145,9 @@ describe('API session', () => {
     assert.match((await call('versions', { provider: 'nope' })).error ?? '', /Unknown provider/);
     assert.match((await call('install', { provider: 'paper' })).error ?? '', /"version"/);
     assert.match((await call('plan', { provider: 'paper', version: '9.9' })).error ?? '', /.+/);
+    const found = res<{ exists: boolean; isDirectory: boolean }>(await call('inspect', { dir: tmp('api') }));
+    assert.deepEqual({ exists: found.exists, isDirectory: found.isDirectory }, { exists: true, isDirectory: true });
+    assert.match((await call('inspect', {})).error ?? '', /"dir"/);
   });
 
   it('forwards sample, problems and quitting events', async () => {

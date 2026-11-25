@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { readInstallMeta } from './installmeta';
 import { readZipFileSync } from './zip';
 
-export type ServerType = 'vanilla' | 'paper' | 'fabric' | 'forge' | 'neoforge' | 'velocity';
+export type ServerType = 'vanilla' | 'paper' | 'fabric' | 'forge' | 'neoforge' | 'velocity' | 'spigot';
 
 export interface DetectedServer {
   type: ServerType;
@@ -109,6 +109,13 @@ export function detectServer(dir: string): DetectedServer | null {
     // proxies have no "nogui" argument and no Minecraft version
     const v = /^velocity-([\d.]+(?:-SNAPSHOT)?)-\d+\.jar$/i.exec(proxy.jar)?.[1];
     return { type: 'velocity', dir, mcVersion: v, launchArgs: ['-jar', proxy.jar], jar: proxy.jar };
+  }
+
+  // Spigot/CraftBukkit have no download here (they come from BuildTools), but existing servers should be recognised
+  const spigot = info.find((j) => j.main.startsWith('org.bukkit.craftbukkit.')) ?? info.find((j) => /^(spigot|craftbukkit)[-.]/i.test(j.jar));
+  if (spigot) {
+    const v = /^(?:spigot|craftbukkit)-([\d.]+)\.jar$/i.exec(spigot.jar)?.[1];
+    return { type: 'spigot', dir, mcVersion: v, launchArgs: launch(spigot.jar), jar: spigot.jar };
   }
 
   const paper = info.find((j) => j.main.startsWith('io.papermc.paperclip.')) ?? info.find((j) => /^paper[-.]/i.test(j.jar));

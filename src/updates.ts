@@ -56,7 +56,7 @@ function sha256File(path: string): Promise<string> {
 export function installed(core: Core): InstalledInfo {
   const det = core.server.detect();
   const meta = readInstallMeta(core.cfg.serverDir);
-  const provider: ProviderId | undefined = meta?.provider ?? (det && det.type !== 'neoforge' ? det.type : undefined);
+  const provider: ProviderId | undefined = meta?.provider ?? (det && det.type !== 'neoforge' && det.type !== 'spigot' ? det.type : undefined);
   let identity = meta?.identity;
   if (!identity && det?.jar) {
     identity =

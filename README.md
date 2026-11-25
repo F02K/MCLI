@@ -124,7 +124,7 @@ MCLI also writes `mcli-install.json` into the server folder to remember what it 
 - **Windows CPU/RAM of the server** is sampled every 10 seconds (via `tasklist`); on Linux and macOS every 2 seconds (via `ps`).
 - **Backups use plain zip** without ZIP64, so a single backup is limited to 4 GB and 65,535 files.
 - **Velocity** is detected by its jar; its port comes from `bind` in `velocity.toml` (default 25565). Other proxies (BungeeCord, Waterfall) are not supported.
-- **Spigot** is not supported (it has no download, only a build tool). Use Paper, which is a drop-in replacement for Spigot plugins.
+- **Spigot** cannot be installed (it has no download, only a build tool), but an existing Spigot server is recognised and run. Use Paper to install, which is a drop-in replacement for Spigot plugins.
 
 ## Building from source
 
