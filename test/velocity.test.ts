@@ -73,3 +73,15 @@ describe('proxy players', () => {
     assert.deepEqual([...players.online.keys()], ['Alex']);
   });
 });
+
+describe('colored console lines', () => {
+  it('counts players from lines that carry terminal color codes (as real Paper prints them)', () => {
+    const server = new ServerProcess(loadConfig(tmp('colors')));
+    const players = new PlayerTracker(server);
+    server.emit('line', '[08:12:23 INFO]: \x1b[93mNetBot joined the game\x1b[0m');
+    assert.deepEqual([...players.online.keys()], ['NetBot']);
+    server.emit('line', '[08:12:28 INFO]: \x1b[93mNetBot left the game\x1b[0m');
+    assert.equal(players.online.size, 0);
+  });
+});
+

@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Config } from './config';
 import { detectServer, type DetectedServer } from './detect';
+import { stripAnsi } from './ansi';
 import { diagnoseLine, type Problem } from './diagnose';
 
 export type ServerState = 'stopped' | 'starting' | 'running' | 'stopping';
@@ -169,9 +170,10 @@ export class ServerProcess extends EventEmitter {
 
   private handleLine(line: string): void {
     this.emit('line', line);
-    const problem = diagnoseLine(line);
+    const plain = stripAnsi(line);
+    const problem = diagnoseLine(plain);
     if (problem) this.addProblem(problem);
-    if (this.state === 'starting' && READY_PATTERN.test(line)) this.markRunning();
+    if (this.state === 'starting' && READY_PATTERN.test(plain)) this.markRunning();
   }
 
   /** Marks a starting server as running (log says "Done", or it answered a status ping). */

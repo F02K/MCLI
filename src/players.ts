@@ -1,6 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { stripAnsi } from './ansi';
 import type { ServerProcess, ServerState } from './server';
 
 const JOIN_RE = /: (\S+) joined the game\s*$/;
@@ -28,7 +29,8 @@ export class PlayerTracker extends EventEmitter {
     });
   }
 
-  private onLine(line: string): void {
+  private onLine(raw: string): void {
+    const line = stripAnsi(raw); // Paper colors "X joined the game" on a real console
     let m = JOIN_RE.exec(line) ?? PROXY_JOIN_RE.exec(line);
     if (m) {
       this.online.set(m[1], Date.now());
