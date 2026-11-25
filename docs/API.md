@@ -31,6 +31,7 @@ Event (no `id`): `{"event": "log", "data": {...}}`
 | `settings` / `setSetting` | `key`, `value` | editable MCLI settings (types are checked) |
 | `setMemory` | `min`, `max` (e.g. `512M`, `2G`) | saved to `mcli.json`; **applies on the next start** (a running JVM cannot change its heap) |
 | `versions` | `provider`, `snapshots` | versions, newest first |
+| `plan` | `provider`, `version` | what an install would fetch: `{display, build, channel, javaMajor, filename, size}` |
 | `install` | `provider`, `version`, `backupFirst` | `true` on success |
 | `update` / `checkUpdates` | `latest` | |
 | `backup` / `backups` | | create / list backups |

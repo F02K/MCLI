@@ -44,6 +44,8 @@ before(async () => {
         return json(res, [{ id: 1, channel: 'STABLE', downloads: {} }]);
       case '/velocity':
         return json(res, { versions: { '4.0.0': ['4.3.1', '4.3.2-SNAPSHOT', '4.3.0'], '3.0.0': ['3.5.1', '3.4.0-SNAPSHOT', '3.4.0'] } });
+      case '/velocity/versions/3.4.0':
+        return json(res, { version: { id: '3.4.0', java: { version: { minimum: 25 } } } });
       case '/velocity/versions/3.5.1/builds':
         return json(res, [
           { id: 40, channel: 'STABLE', downloads: { 'server:default': { name: 'velocity-3.5.1-40.jar', url: 'https://example.invalid/v40', size: 10, checksums: { sha256: 'f'.repeat(64) } } } },
@@ -189,9 +191,10 @@ describe('velocity provider', () => {
     assert.equal(plan.display, 'Velocity 3.5.1 build 40');
   });
 
-  it('falls back to a non-stable build and says so', async () => {
+  it('falls back to a non-stable build and says so, and reads the needed Java from the API', async () => {
     const plan = await prov.velocity.plan('3.4.0');
     assert.equal(plan.display, 'Velocity 3.4.0 build 7 (ALPHA)');
+    assert.equal(plan.javaMajor, 25);
   });
 
   it('rejects versions without builds or downloads', async () => {

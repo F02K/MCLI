@@ -259,8 +259,22 @@ function forge(ep: Endpoints): Provider {
 
 // ---------------------------------------------------------------- Velocity (proxy)
 
-/** Velocity needs Java 17 or newer. */
+/** Fallback when the API does not say: Velocity 3.x runs on Java 17. */
 const VELOCITY_JAVA = 17;
+
+interface PaperVersionInfo {
+  version?: { java?: { version?: { minimum?: number } } };
+}
+
+/** Java the Velocity version needs (4.x needs a newer Java than 3.x), as published by the download API. */
+async function velocityJava(ep: Endpoints, version: string): Promise<number> {
+  try {
+    const info = await fetchJson<PaperVersionInfo>(`${ep.velocity}/versions/${encodeURIComponent(version)}`);
+    return info.version?.java?.version?.minimum ?? VELOCITY_JAVA;
+  } catch {
+    return VELOCITY_JAVA;
+  }
+}
 
 /** "3.4.0-SNAPSHOT" -> [3, 4, 0] */
 function velocityParts(v: string): number[] {
@@ -300,7 +314,7 @@ function velocity(ep: Endpoints): Provider {
         kind: 'jar',
         size: dl.size,
         sha256: dl.checksums.sha256,
-        javaMajor: VELOCITY_JAVA,
+        javaMajor: await velocityJava(ep, version),
         channel: build.channel,
         display: `Velocity ${version} build ${build.id}${build.channel !== 'STABLE' ? ` (${build.channel})` : ''}`,
       };

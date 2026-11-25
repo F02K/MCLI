@@ -103,6 +103,11 @@ export const METHODS: Record<string, Method> = {
     const prov = core.providers[provider(core, str(p, 'provider'))];
     return prov.versions(p.snapshots === true);
   },
+  /** What an install would download (name, build, channel, needed Java) without installing anything. */
+  plan: async (core, p) => {
+    const plan = await core.providers[provider(core, str(p, 'provider'))].plan(str(p, 'version'));
+    return { provider: plan.provider, version: plan.mcVersion, build: plan.identity, channel: plan.channel ?? null, javaMajor: plan.javaMajor ?? null, filename: plan.filename, size: plan.size ?? null, display: plan.display };
+  },
   install: async (core, p) => core.installVersion(provider(core, str(p, 'provider')), str(p, 'version'), p.backupFirst !== false),
   update: (core, p) => core.update(p.latest === true),
   checkUpdates: (core) => core.checkUpdates(),

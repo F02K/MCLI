@@ -144,6 +144,7 @@ describe('API session', () => {
     assert.deepEqual((await call('backups')).result, []);
     assert.match((await call('versions', { provider: 'nope' })).error ?? '', /Unknown provider/);
     assert.match((await call('install', { provider: 'paper' })).error ?? '', /"version"/);
+    assert.match((await call('plan', { provider: 'paper', version: '9.9' })).error ?? '', /.+/);
   });
 
   it('forwards sample, problems and quitting events', async () => {
